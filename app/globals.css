@@ -25,3 +25,54 @@ body {
     text-wrap: balance;
   }
 }
+
+/* styles/globals.css */
+.pagination {
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.page-item {
+  margin: 0 0.25rem;
+}
+
+.page-link {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 0.25rem;
+  color: #0070f3;
+  text-decoration: none;
+}
+
+.page-link:hover {
+  background-color: #f0f0f0;
+}
+
+.active .page-link {
+  background-color: #0070f3;
+  color: #fff;
+}
+
+/* styles/globals.css o equivalente */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+}
