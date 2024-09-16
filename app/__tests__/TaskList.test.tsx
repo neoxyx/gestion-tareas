@@ -2,8 +2,6 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import TaskList from '../components/TaskList';
-import useTaskStore from '../store/useTaskStore';
-import { Task } from '../types/task';
 
 // Mock para useTaskStore
 jest.mock('../store/useTaskStore', () => ({
