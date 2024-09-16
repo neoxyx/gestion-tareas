@@ -12,6 +12,7 @@ const TasksPerPage = 5; // Número de tareas por página
 const TaskList: React.FC = () => {
   const { tasks, removeTask } = useTaskStore();
   const [taskToEdit, setTaskToEdit] = useState<Task | null>(null); // Estado para almacenar la tarea a editar
+  const [taskToDelete, setTaskToDelete] = useState<number | null>(null); // Estado para controlar la tarea a eliminar
   const [currentPage, setCurrentPage] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -25,11 +26,19 @@ const TaskList: React.FC = () => {
   const indexOfFirstTask = indexOfLastTask - TasksPerPage;
   const currentTasks = tasks.slice(indexOfFirstTask, indexOfLastTask);
 
-  const handleDelete = (id: number) => {
+  // Manejador para eliminar la tarea después de confirmar
+  const handleConfirmDelete = () => {
+    if (taskToDelete !== null) {
+      removeTask(taskToDelete);
+      setTaskToDelete(null); // Cierra el modal
+    }
+  };
+
+  /*const handleDelete = (id: number) => {
     if (confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
       removeTask(id);
     }
-  };
+  };*/
 
   return (
     <div className="space-y-4">
@@ -79,7 +88,7 @@ const TaskList: React.FC = () => {
                     Editar
                   </button>
                   <button
-                    onClick={() => handleDelete(task.id)}
+                    onClick={() => setTaskToDelete(task.id)}
                     className="text-red-500 hover:text-red-700"
                   >
                     Eliminar
@@ -111,6 +120,30 @@ const TaskList: React.FC = () => {
           activeClassName={'active'}
         />
       </div>
+
+      {/* Modal de confirmación */}
+      {taskToDelete !== null && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
+            <h2 className="text-xl font-bold mb-4">Confirmar Eliminación</h2>
+            <p className="mb-4">¿Estás seguro de que deseas eliminar esta tarea?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setTaskToDelete(null)} // Cerrar el modal sin eliminar
+                className="bg-gray-500 text-white px-4 py-2 rounded-lg mr-2 hover:bg-gray-600"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleConfirmDelete} // Confirmar y eliminar
+                className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal de formulario */}
       <TaskForm isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />

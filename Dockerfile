@@ -7,12 +7,13 @@ WORKDIR /app
 # Copia los archivos del proyecto al contenedor
 COPY package*.json ./
 COPY tsconfig.json ./
-COPY next.config.js ./
-COPY public ./public
-COPY src ./src
+COPY next.config.mjs ./
 
 # Instala las dependencias
 RUN npm install
+
+# Copia el código fuente de la aplicación
+COPY . .
 
 # Construye la aplicación
 RUN npm run build
@@ -25,8 +26,8 @@ WORKDIR /app
 
 # Copia solo los archivos necesarios del contenedor de construcción
 COPY --from=build /app/.next ./.next
+COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/node_modules ./node_modules
-COPY --from=build /app/public ./public
 
 # Define la variable de entorno para el puerto
 ENV PORT=3000

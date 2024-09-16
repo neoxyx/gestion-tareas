@@ -4,7 +4,6 @@
 import React from 'react';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import TaskList from './components/TaskList';
-import TaskForm from './components/TaskForm';
 import { Task } from './types/task';
 import useTaskStore from './store/useTaskStore';
 
@@ -14,13 +13,11 @@ async function fetchTasksFromAPI(): Promise<Task[]> {
 }
 
 const Home: React.FC = () => {
-  const [tasks, setTasks] = React.useState<Task[]>([]);
   const { addTask } = useTaskStore();
 
   React.useEffect(() => {
     const loadTasks = async () => {
       const initialTasks = await fetchTasksFromAPI();
-      setTasks(initialTasks);
       initialTasks.forEach(addTask);
     };
 
