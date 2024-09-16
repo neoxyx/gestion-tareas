@@ -34,12 +34,6 @@ const TaskList: React.FC = () => {
     }
   };
 
-  /*const handleDelete = (id: number) => {
-    if (confirm('¿Estás seguro de que deseas eliminar esta tarea?')) {
-      removeTask(id);
-    }
-  };*/
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
