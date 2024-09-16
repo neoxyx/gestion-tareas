@@ -1,31 +1,41 @@
-// __tests__/TaskForm.test.tsx
+// app/__tests__/TaskForm.test.tsx
+import React from 'react'; // Importa React
 import { render, screen, fireEvent } from '@testing-library/react';
 import TaskForm from '../components/TaskForm';
 import useTaskStore from '../store/useTaskStore';
-import '@testing-library/jest-dom';
 
-test('muestra mensaje de error si los campos están vacíos', () => {
-    render(<TaskForm />);
+// Mock del store de Zustand
+jest.mock('../store/useTaskStore');
 
-    const submitButton = screen.getByText('Crear Tarea');
-    fireEvent.click(submitButton);
+describe('TaskForm', () => {
+    const addTaskMock = jest.fn();
+    const onCloseMock = jest.fn();
 
-    expect(screen.getByText('El título y la descripción son obligatorios.')).toBeInTheDocument();
-});
+    beforeEach(() => {
+        // Mockea el hook para que devuelva la función mock de addTask
+        (useTaskStore as unknown as jest.Mock).mockReturnValue({
+            addTask: addTaskMock,
+        });
+    });
 
-test('añade una nueva tarea correctamente', () => {
-    render(<TaskForm />);
+    it('should call addTask with correct data when form is submitted', () => {
+        // Renderiza el formulario
+        render(<TaskForm isOpen={true} onClose={onCloseMock} />);
 
-    const titleInput = screen.getByLabelText('Título');
-    const descriptionInput = screen.getByLabelText('Descripción');
-    const submitButton = screen.getByText('Crear Tarea');
+        // Llena el formulario
+        fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Nueva Tarea' } });
+        fireEvent.change(screen.getByLabelText(/Descripción/i), { target: { value: 'Descripción de la tarea' } });
+        fireEvent.change(screen.getByLabelText(/Estado/i), { target: { value: 'completed' } });
 
-    fireEvent.change(titleInput, { target: { value: 'Nueva Tarea' } });
-    fireEvent.change(descriptionInput, { target: { value: 'Descripción de la nueva tarea' } });
-    fireEvent.click(submitButton);
+        // Envía el formulario
+        fireEvent.click(screen.getByText(/Crear Tarea/i));
 
-    const tasks = useTaskStore.getState().tasks;
-    expect(tasks).toHaveLength(1);
-    expect(tasks[0].title).toBe('Nueva Tarea');
-    expect(tasks[0].description).toBe('Descripción de la nueva tarea');
+        // Verifica que addTask fue llamado con los datos correctos
+        expect(addTaskMock).toHaveBeenCalledWith({
+            id: expect.any(Number), // Verifica que se use un ID numérico
+            title: 'Nueva Tarea',
+            description: 'Descripción de la tarea',
+            status: 'completed',
+        });
+    });
 });

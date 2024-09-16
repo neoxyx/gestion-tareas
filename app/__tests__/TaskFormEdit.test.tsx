@@ -1,28 +1,51 @@
-// __tests__/TaskFormEdit.test.tsx
-import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+import { render, fireEvent, screen } from '@testing-library/react';
 import TaskFormEdit from '../components/TaskFormEdit';
 import useTaskStore from '../store/useTaskStore';
-import '@testing-library/jest-dom';
 import { Task } from '../types/task';
 
-const mockTask: Task = {
+// Mock de la tienda de tareas
+jest.mock('../store/useTaskStore', () => ({
+  __esModule: true,
+  default: jest.fn(() => ({
+    updateTask: jest.fn(),
+  })),
+}));
+
+describe('TaskFormEdit', () => {
+  const setTaskToEditMock = jest.fn();
+  const initialTask: Task = {
     id: 1,
-    title: 'Tarea de prueba',
-    description: 'Descripción de prueba',
+    title: 'Tarea Inicial',
+    description: 'Descripción Inicial',
     status: 'pending',
-};
+  };
 
-test('edita una tarea correctamente', () => {
-    const mockSetTaskToEdit = jest.fn();
-    render(<TaskFormEdit task={mockTask} setTaskToEdit={mockSetTaskToEdit} />);
+  it('should call updateTask with correct data when form is submitted', () => {
+    // Configura el mock de updateTask
+    const updateTaskMock = jest.fn();
+    (useTaskStore as unknown as jest.Mock).mockReturnValue({ updateTask: updateTaskMock });
+    
+    // Renderiza el componente TaskFormEdit con la tarea inicial
+    render(<TaskFormEdit task={initialTask} setTaskToEdit={setTaskToEditMock} />);
 
-    const titleInput = screen.getByLabelText('Título');
-    fireEvent.change(titleInput, { target: { value: 'Tarea editada' } });
+    // Llena el formulario con datos actualizados
+    fireEvent.change(screen.getByLabelText(/Título/i), { target: { value: 'Tarea Actualizada' } });
+    fireEvent.change(screen.getByLabelText(/Descripción/i), { target: { value: 'Descripción Actualizada' } });
+    fireEvent.change(screen.getByLabelText(/Estado/i), { target: { value: 'completed' } });
 
-    const submitButton = screen.getByText('Guardar Cambios');
-    fireEvent.click(submitButton);
+    // Envía el formulario
+    fireEvent.click(screen.getByText(/Guardar Cambios/i));
 
-    const tasks = useTaskStore.getState().tasks;
-    expect(tasks[0].title).toBe('Tarea editada');
-    expect(mockSetTaskToEdit).toHaveBeenCalledWith(null);
+    // Verifica que updateTask haya sido llamado con los datos correctos
+    expect(useTaskStore().updateTask).toHaveBeenCalledWith(1, {
+      id: 1,
+      title: 'Tarea Actualizada',
+      description: 'Descripción Actualizada',
+      status: 'completed',
+    });
+
+    // Verifica que el formulario se cierra después de enviar
+    expect(setTaskToEditMock).toHaveBeenCalledWith(null);
+  });
 });

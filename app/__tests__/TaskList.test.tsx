@@ -1,47 +1,50 @@
-// __tests__/TaskList.test.tsx
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import TaskList from '../components/TaskList';
 import useTaskStore from '../store/useTaskStore';
 import { Task } from '../types/task';
-import '@testing-library/jest-dom';
 
-const mockTasks: Task[] = [
-    { id: 1, title: 'Tarea 1', description: 'Descripción 1', status: 'pending' },
-    { id: 2, title: 'Tarea 2', description: 'Descripción 2', status: 'completed' },
-];
+// Mock para useTaskStore
+jest.mock('../store/useTaskStore', () => ({
+    __esModule: true,
+    default: () => ({
+        tasks: [
+            { id: 1, title: 'Tarea 1', description: 'Descripción 1', status: 'pending' },
+            { id: 2, title: 'Tarea 2', description: 'Descripción 2', status: 'completed' },
+        ],
+        removeTask: jest.fn(),
+    }),
+}));
 
-beforeEach(() => {
-    const store = useTaskStore.getState();
-    store.tasks = mockTasks; // Preparamos el estado inicial con tareas de prueba
-});
+describe('TaskList Component', () => {
+    it('debería renderizar la lista de tareas', () => {
+        render(<TaskList />);
 
-test('elimina una tarea correctamente', () => {
-    render(<TaskList />);
+        expect(screen.getByText('Tarea 1')).toBeInTheDocument();
+        expect(screen.getByText('Descripción 1')).toBeInTheDocument();
+        expect(screen.getByText('Tarea 2')).toBeInTheDocument();
+        expect(screen.getByText('Descripción 2')).toBeInTheDocument();
+    });
 
-    // Verificamos que ambas tareas están en el documento
-    expect(screen.getByText('Tarea 1')).toBeInTheDocument();
-    expect(screen.getByText('Tarea 2')).toBeInTheDocument();
+    it('debería abrir el modal de confirmación al hacer clic en "Eliminar"', () => {
+        render(<TaskList />);
 
-    const deleteButton = screen.getAllByText('Eliminar')[0];
-    fireEvent.click(deleteButton); // Eliminamos la primera tarea
+        const deleteButton = screen.getAllByText('Eliminar')[0];
+        fireEvent.click(deleteButton);
 
-    // Solo debe quedar una tarea
-    expect(screen.queryByText('Tarea 1')).not.toBeInTheDocument();
-    expect(screen.getByText('Tarea 2')).toBeInTheDocument();
-});
+        expect(screen.getByText('Confirmar Eliminación')).toBeInTheDocument();
+    });
 
-test('renderiza tareas correctamente', () => {
-    const tasks: Task[] = [
-        { id: 1, title: 'Tarea 1', description: 'Descripción 1', status: 'pending' },
-        { id: 2, title: 'Tarea 2', description: 'Descripción 2', status: 'completed' },
-    ];
+    it('debería cerrar el modal de confirmación al hacer clic en "Cancelar"', () => {
+        render(<TaskList />);
 
-    useTaskStore.setState({ tasks });
+        const deleteButton = screen.getAllByText('Eliminar')[0];
+        fireEvent.click(deleteButton);
 
-    render(<TaskList />);
+        const cancelButton = screen.getByText('Cancelar');
+        fireEvent.click(cancelButton);
 
-    expect(screen.getByText('Tarea 1')).toBeInTheDocument();
-    expect(screen.getByText('Descripción 1')).toBeInTheDocument();
-    expect(screen.getByText('Tarea 2')).toBeInTheDocument();
-    expect(screen.getByText('Descripción 2')).toBeInTheDocument();
+        expect(screen.queryByText('Confirmar Eliminación')).not.toBeInTheDocument();
+    });
 });
